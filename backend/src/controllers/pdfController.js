@@ -20,7 +20,8 @@ const uploadAndProcessPdf = async (req, res, next) => {
 
     // Step 1: Upload to LlamaParse
     const uploadResponse = await uploadPdfToLlamaParse(filePath);
-    const jobId = uploadResponse.job_id;
+    // console.log("upload response:", uploadResponse); //{ id: 'b8f0fe1f-06b0-4379-a133-ea2696d947b9', status: 'PENDING' }
+    const jobId = uploadResponse.id;
 
     // Step 2: Poll for job completion (in a real app, you might want to use a queue or webhook)
     let statusResponse;
@@ -29,7 +30,9 @@ const uploadAndProcessPdf = async (req, res, next) => {
     // Simple polling implementation - in production, use a proper job queue
     while (!isComplete) {
       statusResponse = await checkParsingStatus(jobId);
-      isComplete = statusResponse.status === "COMPLETED";
+      // console.log("Status response:", statusResponse);
+
+      isComplete = statusResponse.status === "SUCCESS"; //Status response: { id: 'f5d2f40d-b2f1-4520-8471-39b6de86c081', status: 'PENDING' }
 
       if (statusResponse.status === "FAILED") {
         throw new Error("Parsing job failed");
@@ -42,10 +45,8 @@ const uploadAndProcessPdf = async (req, res, next) => {
 
     // Step 3: Get the parsed markdown content
     const parsedContent = await getParsedMarkdown(jobId);
+    // console.log("parsed content:", parsedContent);
     // TODO: In the next step, we'll add code to process this with LlamaIndex and store in Chroma DB
-
-    // Clean up the temporary file
-    fs.unlinkSync(filePath);
 
     return res.status(200).json({
       success: true,
@@ -53,14 +54,14 @@ const uploadAndProcessPdf = async (req, res, next) => {
       documentId: documentId,
       jobId: jobId,
       // We're returning this for now, but in production we wouldn't
-      contentPreview: parsedContent.substring(0, 200) + "...",
+      contentPreview: parsedContent,
     });
   } catch (error) {
-    // Clean up the file if it exists and there was an error
+    next(error);
+  } finally {
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    next(error);
   }
 };
 
