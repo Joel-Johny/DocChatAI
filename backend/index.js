@@ -29,11 +29,6 @@ if (!fs.existsSync(uploadsDir)) {
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/query", queryRoutes);
 
-// Health check route
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok", message: "Server is running" });
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

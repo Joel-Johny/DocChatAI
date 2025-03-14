@@ -2,26 +2,18 @@
 const path = require("path");
 
 // This will be implemented in more detail in Issue 2
-const uploadAndProcessPdf = async (req, res, next) => {
+const askQuestion = async (req, res, next) => {
   try {
     // Basic implementation for now
-    if (!req.file) {
+    // For now, just return the question and answer as a response
+    if (!req.body.question) {
       return res
         .status(400)
-        .json({ error: true, message: "No PDF file uploaded" });
+        .json({ error: true, message: "No question provided" });
     }
-
-    // For now, just return the file info
-    // In Issue 2, we'll add the actual processing with LlamaParse and LlamaIndex
-    return res.status(200).json({
-      success: true,
-      message: "PDF received successfully",
-      documentId: path.parse(req.file.filename).name, // Using filename without extension as temp ID
-      fileInfo: req.file,
-    });
   } catch (error) {
     next(error);
   }
 };
 
-module.exports = { uploadAndProcessPdf };
+module.exports = { askQuestion };
