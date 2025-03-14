@@ -1,12 +1,11 @@
 // src/controllers/pdfController.js
-const path = require("path");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const {
   uploadPdfToLlamaParse,
   checkParsingStatus,
   getParsedMarkdown,
-} = require("../services/llamaParseService");
+} = require("../config/llamaParseService");
 
 const uploadAndProcessPdf = async (req, res, next) => {
   try {

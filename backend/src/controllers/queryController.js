@@ -1,6 +1,3 @@
-// src/controllers/pdfController.js
-const path = require("path");
-
 // This will be implemented in more detail in Issue 2
 const askQuestion = async (req, res, next) => {
   try {
