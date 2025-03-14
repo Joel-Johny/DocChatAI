@@ -54,7 +54,7 @@ function ChatInterface({ onCitationClick }) {
         </button>
         <div className="flex items-center">
           <Book className="h-6 w-6 text-blue-500 mr-2" />
-          <h1 className="text-xl font-semibold">PDF Q&A Chat</h1>
+          <h1 className="text-xl font-semibold">Document Mind</h1>
         </div>
       </div>
 
