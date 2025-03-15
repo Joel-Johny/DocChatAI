@@ -5,61 +5,104 @@ const {
   uploadPdfToLlamaParse,
   checkParsingStatus,
   getParsedMarkdown,
-} = require("../config/llamaParseService");
+} = require("../services/llamaParseService");
+const { vectorizeChunks, chunkText } = require("../services/langChainService"); // Import from LangChain service
 
 const uploadAndProcessPdf = async (req, res, next) => {
   try {
+    // Check if a file was uploaded
     if (!req.file) {
       return res
         .status(400)
         .json({ error: true, message: "No PDF file uploaded" });
     }
 
+    // Get the path of the uploaded file
     const filePath = req.file.path;
-    const documentId = uuidv4(); // Generate a unique ID for this document
+    // Generate a unique ID for this document
+    const documentId = uuidv4();
+    // Get the original filename for metadata
+    const originalFilename = req.file.originalname;
+
+    console.log(`Processing file: ${originalFilename}`);
+    console.log(`Assigned document ID: ${documentId}`);
 
     // Step 1: Upload to LlamaParse
+    console.log("Uploading to LlamaParse...");
     const uploadResponse = await uploadPdfToLlamaParse(filePath);
-    // console.log("upload response:", uploadResponse); //{ id: 'b8f0fe1f-06b0-4379-a133-ea2696d947b9', status: 'PENDING' }
     const jobId = uploadResponse.id;
+    console.log(`LlamaParse job created with ID: ${jobId}`);
 
-    // Step 2: Poll for job completion (in a real app, you might want to use a queue or webhook)
+    // Step 2: Poll for job completion
     let statusResponse;
     let isComplete = false;
+    console.log("Checking LlamaParse processing status...");
 
-    // Simple polling implementation - in production, use a proper job queue
+    // Keep checking until the job is complete
     while (!isComplete) {
+      // Get current status
       statusResponse = await checkParsingStatus(jobId);
-      // console.log("Status response:", statusResponse);
+      console.log(`Current status: ${statusResponse.status}`);
 
-      isComplete = statusResponse.status === "SUCCESS"; //Status response: { id: 'f5d2f40d-b2f1-4520-8471-39b6de86c081', status: 'PENDING' }
+      // Check if job is complete
+      isComplete = statusResponse.status === "SUCCESS";
 
+      // Handle failed jobs
       if (statusResponse.status === "FAILED") {
         throw new Error("Parsing job failed");
       }
 
+      // If not complete, wait before checking again
       if (!isComplete) {
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2 seconds before checking again
+        console.log("Waiting for processing to complete...");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
 
     // Step 3: Get the parsed markdown content
+    console.log("Retrieving parsed content...");
     const parsedContent = await getParsedMarkdown(jobId);
-    // console.log("parsed content:", parsedContent);
-    // TODO: In the next step, we'll add code to process this with LlamaIndex and store in Chroma DB
+    console.log(
+      `Retrieved parsed content (${parsedContent?.markdown?.length} characters)`
+    );
 
+    // Step 4: Convert parsed content to vector embeddings using LangChain
+    console.log("Converting to vector embeddings with LangChain...");
+    const metadata = {
+      filename: originalFilename,
+      processDate: new Date().toISOString(),
+    };
+
+    // Process the content with LangChain
+    const parsedContentMarkdown = parsedContent?.markdown;
+    const chunks = await chunkText(parsedContentMarkdown);
+    const vectorizationResult = await vectorizeChunks(
+      chunks,
+      documentId,
+      metadata
+    );
+
+    // Return success response with detailed information
     return res.status(200).json({
       success: true,
-      message: "PDF processed successfully",
+      message: "PDF processed and vectorized successfully",
       documentId: documentId,
       jobId: jobId,
-      // We're returning this for now, but in production we wouldn't
-      contentPreview: parsedContent,
+      pageCount: vectorizationResult.pageCount,
+      chunkCount: vectorizationResult.chunkCount,
+      status: vectorizationResult.status,
+      // Return sample vector data and content preview for inspection
+      vectorSamples: vectorizationResult.samples,
+      contentPreview: parsedContent.substring(0, 300) + "...", // Shortened preview
     });
   } catch (error) {
+    // Log and pass error to error handler
+    console.error("Error processing PDF:", error);
     next(error);
   } finally {
+    // Clean up the temporary file regardless of success/failure
     if (req.file && fs.existsSync(req.file.path)) {
+      console.log(`Cleaning up temporary file: ${req.file.path}`);
       fs.unlinkSync(req.file.path);
     }
   }
