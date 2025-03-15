@@ -2,17 +2,33 @@ const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
 
 const vectorizeChunks = async (chunks) => {
   try {
-    parsedContent = parsedContent?.markdown;
-    console.log("🔹 Got the Chunks", chunks);
+    const { pipeline } = await import("@xenova/transformers");
 
-    console.log(`✅ Successfully chunked text into ${chunks.length} chunks.`);
-    console.log(`✅ Successfully chunked text into ${chunks} chunks.`);
-    return {};
-  } catch (error) {
-    console.error(
-      `❌ Error converting document ${documentId} to vectors:`,
-      error
+    // Load the free embedding model
+    const embedder = await pipeline(
+      "feature-extraction",
+      "Xenova/all-MiniLM-L6-v2"
     );
+
+    // Generate embeddings for each chunk
+    const vectors = await Promise.all(
+      chunks.map(async (chunk, index) => {
+        const vector = await embedder(chunk, {
+          pooling: "mean",
+          normalize: true,
+        });
+
+        return {
+          id: `chunk_${index}`, // Assign a unique ID to each chunk
+          text: chunk, // Store the original chunk text
+          vector: vector.data, // Use Xenova vector output
+        };
+      })
+    );
+
+    return vectors;
+  } catch (error) {
+    console.error(`❌ Error converting document chunks to vectors:`, error);
     throw error;
   }
 };

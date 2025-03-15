@@ -67,33 +67,19 @@ const uploadAndProcessPdf = async (req, res, next) => {
     );
 
     // Step 4: Convert parsed content to vector embeddings using LangChain
-    console.log("Converting to vector embeddings with LangChain...");
-    const metadata = {
-      filename: originalFilename,
-      processDate: new Date().toISOString(),
-    };
+    console.log("Converting to vector embeddings using xenova...");
 
     // Process the content with LangChain
     const parsedContentMarkdown = parsedContent?.markdown;
     const chunks = await chunkText(parsedContentMarkdown);
-    const vectorizationResult = await vectorizeChunks(
-      chunks,
-      documentId,
-      metadata
-    );
-
+    const vectorizationResult = await vectorizeChunks(chunks);
+    // console.log(vectorizationResult);
     // Return success response with detailed information
     return res.status(200).json({
       success: true,
       message: "PDF processed and vectorized successfully",
       documentId: documentId,
-      jobId: jobId,
-      pageCount: vectorizationResult.pageCount,
-      chunkCount: vectorizationResult.chunkCount,
-      status: vectorizationResult.status,
-      // Return sample vector data and content preview for inspection
-      vectorSamples: vectorizationResult.samples,
-      contentPreview: parsedContent.substring(0, 300) + "...", // Shortened preview
+      vectorizationResult,
     });
   } catch (error) {
     // Log and pass error to error handler
