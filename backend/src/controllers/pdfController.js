@@ -80,6 +80,7 @@ const uploadAndProcessPdf = async (req, res, next) => {
       success: true,
       message: "PDF processed and vectorized successfully",
       documentId: documentId,
+      chunksLength: chunks.length,
       result,
     });
   } catch (error) {

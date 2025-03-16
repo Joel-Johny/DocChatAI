@@ -71,22 +71,20 @@ const queryVectorDB = async (queryVector, documentId) => {
     const results = await mongoCollection
       .aggregate([
         {
-          $match: { documentId }, // Filter by documentId first
-        },
-        {
           $vectorSearch: {
             index: "vector_index", // Your MongoDB Atlas Vector Index name
             path: "embedding", // Field where embeddings are stored
-            queryVector: queryVector,
-            numCandidates: 100, // Candidates to consider
-            limit: 5, // Return top 5 similar results
-            metric: "cosine", // Use cosine similarity (since we normalized embeddings)
+            queryVector, // Query against precomputed vector
+            numCandidates: 100, // Consider top 100 candidates
+            limit: 5, // Return top 5 matches
+            metric: "cosine", // Use cosine similarity
+            filter: { documentId }, // Move filtering inside $vectorSearch
           },
         },
       ])
       .toArray();
 
-    console.log("🔍 Top matching documents:", results);
+    // console.log("🔍 Top matching documents:", results);
     return results;
   } catch (error) {
     console.error("❌ Error during vector search:", error);
