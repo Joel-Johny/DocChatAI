@@ -29,11 +29,6 @@ if (!fs.existsSync(uploadsDir)) {
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/query", queryRoutes);
 
-// Health check route
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok", message: "Server is running" });
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -44,6 +39,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
+app.get("/", (req, res) => res.send("Hello from the backend! get data"));
+app.post("/test-post", (req, res) =>
+  res.send("Hello from the backend! post data")
+);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
