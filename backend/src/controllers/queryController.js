@@ -1,6 +1,6 @@
 const { convertToVector } = require("../services/langChainService");
 const { queryVectorDB } = require("../services/mongoDBVectorService");
-
+const { generateAnswer } = require("../services/llmService");
 const askQuestion = async (req, res, next) => {
   try {
     const question = req.body.question;
@@ -17,14 +17,16 @@ const askQuestion = async (req, res, next) => {
     // Step 2: Find relevant document chunks using vector search
     const relevantChunks = await queryVectorDB(queryVector, documentId);
 
+    // Step 3: Generate an answer using the retrieved chunks
+    const answer = await generateAnswer(question, relevantChunks);
+
     // Step 3: Return the retrieved answer (for now, just returning chunks)
-    res
-      .status(200)
-      .json({
-        question,
-        relevantChunks,
-        lengthOfRelevantChunks: relevantChunks.length,
-      });
+    res.status(200).json({
+      question,
+      relevantChunks,
+      lengthOfRelevantChunks: relevantChunks.length,
+      answer,
+    });
   } catch (error) {
     next(error);
   }
