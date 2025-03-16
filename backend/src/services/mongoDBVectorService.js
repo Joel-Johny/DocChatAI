@@ -1,5 +1,4 @@
 // mongoDBVectorService.js
-
 const { MongoClient } = require("mongodb");
 
 let client;
@@ -13,13 +12,10 @@ const connectDB = async () => {
         throw new Error("MongoDB Atlas URI not found in environment variables");
       }
 
-      client = new MongoClient(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      client = new MongoClient(uri);
 
       await client.connect();
-      console.log("Connected to MongoDB Atlas");
+      console.log("✅ Connected to MongoDB Atlas");
 
       const dbName = process.env.MONGODB_ATLAS_DB_NAME || "document_mind";
       const collectionName =
@@ -28,20 +24,17 @@ const connectDB = async () => {
       const db = client.db(dbName);
       collection = db.collection(collectionName);
     } catch (error) {
-      console.error("Error connecting to MongoDB Atlas:", error);
+      console.error("❌ Error connecting to MongoDB Atlas:", error);
       throw error;
     }
   }
   return collection;
 };
 
-/**
- * Close the MongoDB Atlas connection.
- */
 const closeDB = async () => {
   if (client) {
     await client.close();
-    console.log("MongoDB Atlas connection closed");
+    console.log("✅ MongoDB Atlas connection closed");
     client = null;
     collection = null;
   }
@@ -49,32 +42,20 @@ const closeDB = async () => {
 
 const saveVectors = async (vectors, documentId) => {
   try {
-    const mongoCollection = await connectDB();
+    const mongoCollection = await connectDB(); // Use the shared connection
 
-    // Map your vector objects to the desired document format.
-    // Note: We store the vector in the field "embedding" to match our Atlas index.
-    const operations = vectors.map((v) => ({
-      updateOne: {
-        filter: { id: v.id, documentId }, // Ensure uniqueness per document
-        update: {
-          $set: {
-            id: v.id,
-            documentId,
-            text: v.text,
-            embedding: v.vector, // Save the vector under "embedding"
-          },
-        },
-        upsert: true,
-      },
+    const documents = vectors.map((vector) => ({
+      documentId,
+      text: vector.text,
+      embedding: vector.vector, // Store vectors under "embedding" (to match MongoDB index)
     }));
 
-    const result = await mongoCollection.bulkWrite(operations);
-    console.log(
-      `Successfully stored ${vectors.length} vectors for document ${documentId}`
-    );
+    const result = await mongoCollection.insertMany(documents);
+    console.log(`✅ Successfully stored ${result.insertedCount} vectors`);
+
     return result;
   } catch (error) {
-    console.error("Error saving vectors to MongoDB Atlas:", error);
+    console.error("❌ Error saving vectors:", error);
     throw error;
   }
 };

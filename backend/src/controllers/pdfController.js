@@ -74,7 +74,7 @@ const uploadAndProcessPdf = async (req, res, next) => {
     const chunks = await chunkText(parsedContentMarkdown);
     const vectorizationResult = await vectorizeChunks(chunks);
     // console.log(vectorizationResult);
-    const result = await saveVectors(vectorizationResult);
+    const result = await saveVectors(vectorizationResult, documentId);
     // Return success response with detailed information
     return res.status(200).json({
       success: true,

@@ -24,7 +24,6 @@ const vectorizeChunks = async (chunks) => {
     //       : Object.values(vector.data);
 
     //     return {
-    //       id: `chunk_${index}`, // Unique ID for each chunk
     //       text: chunk, // Original chunk text
     //       vector: vectorArray, // Embedding array
     //     };
@@ -44,7 +43,6 @@ const vectorizeChunks = async (chunks) => {
         : Object.values(vector.data);
 
       vectors.push({
-        id: `chunk_${index}`,
         text: chunk,
         vector: vectorArray,
       });
