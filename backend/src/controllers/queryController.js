@@ -1,4 +1,4 @@
-const { convertToVector } = require("../services/langchainService");
+const { convertToVector } = require("../services/langChainService");
 const { queryVectorDB } = require("../services/mongoDBVectorService");
 
 const askQuestion = async (req, res, next) => {
