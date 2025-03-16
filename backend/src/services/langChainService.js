@@ -46,10 +46,9 @@ async function chunkText(parsedText) {
   console.log("Parsed Text Length:", parsedText.length); // Debugging
 
   // Step 2: Chunk using RecursiveCharacterTextSplitter
-  const splitter = new RecursiveCharacterTextSplitter({
+  const splitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
     chunkSize: 512,
     chunkOverlap: 50,
-    separators: ["\n\n", "\n", ". ", " "], // Ensures better sentence-based splitting
   });
   const chunks = await splitter.splitText(parsedText);
   console.log("🔹 Total Chunks Created:", chunks.length);
