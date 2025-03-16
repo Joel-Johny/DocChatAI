@@ -60,8 +60,43 @@ const saveVectors = async (vectors, documentId) => {
   }
 };
 
+const queryVectorDB = async (queryVector, documentId) => {
+  try {
+    if (!Array.isArray(queryVector)) {
+      throw new Error("Invalid query vector format.");
+    }
+
+    const mongoCollection = await connectDB(); // Use the shared connection
+
+    const results = await mongoCollection
+      .aggregate([
+        {
+          $match: { documentId }, // Filter by documentId first
+        },
+        {
+          $vectorSearch: {
+            index: "vector_index", // Your MongoDB Atlas Vector Index name
+            path: "embedding", // Field where embeddings are stored
+            queryVector: queryVector,
+            numCandidates: 100, // Candidates to consider
+            limit: 5, // Return top 5 similar results
+            metric: "cosine", // Use cosine similarity (since we normalized embeddings)
+          },
+        },
+      ])
+      .toArray();
+
+    console.log("🔍 Top matching documents:", results);
+    return results;
+  } catch (error) {
+    console.error("❌ Error during vector search:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   connectDB,
   closeDB,
   saveVectors,
+  queryVectorDB,
 };
