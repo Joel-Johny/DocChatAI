@@ -7,7 +7,7 @@ const {
   getParsedMarkdown,
 } = require("../services/llamaParseService");
 const { vectorizeChunks, chunkText } = require("../services/langChainService"); // Import from LangChain service
-
+const { saveVectors } = require("../services/mongoDBVectorService");
 const uploadAndProcessPdf = async (req, res, next) => {
   try {
     // Check if a file was uploaded
@@ -74,12 +74,13 @@ const uploadAndProcessPdf = async (req, res, next) => {
     const chunks = await chunkText(parsedContentMarkdown);
     const vectorizationResult = await vectorizeChunks(chunks);
     // console.log(vectorizationResult);
+    const result = await saveVectors(vectorizationResult);
     // Return success response with detailed information
     return res.status(200).json({
       success: true,
       message: "PDF processed and vectorized successfully",
       documentId: documentId,
-      vectorizationResult,
+      result,
     });
   } catch (error) {
     // Log and pass error to error handler
