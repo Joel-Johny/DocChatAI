@@ -23,8 +23,8 @@ const askQuestion = async (req, res, next) => {
     // Step 3: Return the retrieved answer (for now, just returning chunks)
     res.status(200).json({
       question,
-      relevantChunks,
-      lengthOfRelevantChunks: relevantChunks.length,
+      // relevantChunks,
+      // lengthOfRelevantChunks: relevantChunks.length,
       answer,
     });
   } catch (error) {

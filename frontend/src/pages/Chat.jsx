@@ -5,16 +5,19 @@ import ChatInterface from "../components/ChatInterface";
 
 function Chat() {
   const [pdfFile, setPdfFile] = useState(null);
+  const [documentId, setDocumentId] = useState(null);
   const pdfViewerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedPdf = localStorage.getItem("pdfFile");
-    if (!storedPdf) {
+    const storedDocumentId = localStorage.getItem("pdfDocumentId");
+    if (!storedPdf || !storedDocumentId) {
       navigate("/");
       return;
     }
     setPdfFile(storedPdf);
+    setDocumentId(storedDocumentId);
   }, [navigate]);
 
   const handleCitationClick = (page) => {
@@ -27,7 +30,10 @@ function Chat() {
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Chat Section */}
       <div className="w-full md:w-1/2">
-        <ChatInterface onCitationClick={handleCitationClick} />
+        <ChatInterface
+          onCitationClick={handleCitationClick}
+          documentId={documentId}
+        />
       </div>
 
       {/* PDF Viewer Section */}
