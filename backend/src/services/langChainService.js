@@ -1,51 +1,34 @@
 const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
-
-const vectorizeChunks = async (chunks) => {
+const convertToVector = async (text) => {
   try {
-    const { pipeline } = await import("@xenova/transformers");
+    if (!text || typeof text !== "string" || text.trim().length === 0) {
+      throw new Error("Invalid text for embedding.");
+    }
 
-    // Load the embedding model
+    const { pipeline } = await import("@xenova/transformers");
     const embedder = await pipeline(
       "feature-extraction",
       "Xenova/all-MiniLM-L6-v2"
     );
 
-    // M1 Processes chunks in small concurrent batches to balance performance with embedding consistency.
-    // const vectors = await Promise.all(
-    //   chunks.map(async (chunk, index) => {
-    //     const vector = await embedder(chunk, {
-    //       pooling: "mean",
-    //       normalize: true,
-    //     });
+    const vector = await embedder(text, { pooling: "mean", normalize: true });
 
-    //     // Convert vector.data to an array if necessary
-    //     const vectorArray = Array.isArray(vector.data)
-    //       ? vector.data
-    //       : Object.values(vector.data);
+    return Array.isArray(vector.data)
+      ? vector.data
+      : Object.values(vector.data);
+  } catch (error) {
+    console.error("Error converting text to vector:", error);
+    throw error;
+  }
+};
 
-    //     return {
-    //       text: chunk, // Original chunk text
-    //       vector: vectorArray, // Embedding array
-    //     };
-    //   })
-    // );
-    // M2 Sequentially processes each chunk one at a time to ensure consistent embedding generation.
+const vectorizeChunks = async (chunks) => {
+  try {
     const vectors = [];
-    for (let index = 0; index < chunks.length; index++) {
-      const chunk = chunks[index];
-      const vector = await embedder(chunk, {
-        pooling: "mean",
-        normalize: true,
-      });
-      // Ensure the vector data is in array format
-      const vectorArray = Array.isArray(vector.data)
-        ? vector.data
-        : Object.values(vector.data);
 
-      vectors.push({
-        text: chunk,
-        vector: vectorArray,
-      });
+    for (const chunk of chunks) {
+      const vectorArray = await convertToVector(chunk);
+      vectors.push({ text: chunk, vector: vectorArray });
     }
 
     return vectors;
@@ -88,4 +71,4 @@ async function chunkText(parsedText) {
   return chunks;
 }
 
-module.exports = { vectorizeChunks, chunkText };
+module.exports = { vectorizeChunks, chunkText, convertToVector };
