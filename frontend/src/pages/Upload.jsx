@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload as UploadIcon, FileText, AlertCircle } from "lucide-react";
+import { Upload as UploadIcon, AlertCircle } from "lucide-react";
 import axios from "axios";
 
 function Upload() {
