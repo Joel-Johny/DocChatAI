@@ -3,13 +3,13 @@ import { Send, ChevronLeft, Book, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Thinking from "./Thinking";
+import ChatHeader from "./ChatHeader";
 
 function ChatInterface({ onCitationClick }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef(null);
-  const navigate = useNavigate();
 
   // Add greeting message when component mounts
   useEffect(() => {
@@ -105,22 +105,7 @@ function ChatInterface({ onCitationClick }) {
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <div className="p-4 border-b bg-white flex items-center">
-        <button
-          onClick={() => {
-            localStorage.removeItem("pdfFile");
-            localStorage.removeItem("pdfDocumentId");
-            navigate("/");
-          }}
-          className="mr-4 hover:bg-gray-100 p-2 rounded-full"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-        <div className="flex items-center">
-          <Book className="h-6 w-6 text-blue-500 mr-2" />
-          <h1 className="text-xl font-semibold">Document Mind</h1>
-        </div>
-      </div>
+      <ChatHeader />
 
       {/* Messages */}
       <div
