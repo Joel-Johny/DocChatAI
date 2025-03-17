@@ -47,7 +47,10 @@ function ChatInterface({ onCitationClick }) {
       {/* Header */}
       <div className="p-4 border-b bg-white flex items-center">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => {
+            localStorage.removeItem("pdfFile");
+            navigate("/");
+          }}
           className="mr-4 hover:bg-gray-100 p-2 rounded-full"
         >
           <ChevronLeft className="h-5 w-5" />

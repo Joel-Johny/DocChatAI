@@ -8,20 +8,28 @@
   font-weight: 400;
 }
 
+html,
 body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
   min-width: 320px;
-  min-height: 100vh;
 }
 
 /* PDF viewer styling */
 .react-pdf__Page__canvas {
   margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 510px !important;
+  height: auto !important;
 }
 
-/* Smooth scrolling for chat */
+/* Smooth scrolling for containers */
 .overflow-y-auto {
   scroll-behavior: smooth;
 }
@@ -29,4 +37,11 @@ body {
 /* Focus styles */
 *:focus {
   outline: none;
+}
+
+/* Fix for mobile layout */
+@media (max-width: 768px) {
+  body {
+    overflow: auto;
+  }
 }
