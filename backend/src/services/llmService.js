@@ -62,4 +62,15 @@ const generateAnswer = async (question, relevantChunks) => {
   }
 };
 
-module.exports = { generateAnswer };
+function extractAndRemovePageNumbers(text) {
+  const regex = /\{\{page (\d+)\}\}/g; // Matches {{page X}}
+  const pageNumbers = [...text.matchAll(regex)].map((match) =>
+    parseInt(match[1], 10)
+  );
+
+  // Remove all occurrences of {{page X}} from the text
+  const answer = text.replace(regex, "").replace(/\s+/g, " ").trim();
+
+  return { pageNumbers, answer };
+}
+module.exports = { generateAnswer, extractAndRemovePageNumbers };
