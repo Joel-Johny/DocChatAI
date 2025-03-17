@@ -10,7 +10,7 @@ const convertToVector = async (text) => {
       "feature-extraction",
       "Xenova/all-MiniLM-L6-v2"
     );
-
+    // console.log("🔹 Converting text to vector...");
     const vector = await embedder(text, { pooling: "mean", normalize: true });
 
     return Array.isArray(vector.data)
@@ -23,31 +23,22 @@ const convertToVector = async (text) => {
 };
 
 const vectorizeChunks = async (chunks) => {
+  console.log("🔹 Vectorizing Chunks...");
   try {
     const vectors = [];
 
     for (const chunk of chunks) {
-      const vectorArray = await convertToVector(chunk);
-      vectors.push({ text: chunk, vector: vectorArray });
+      const vectorArray = await convertToVector(chunk.text);
+      vectors.push({ text: chunk.text, vector: vectorArray, page: chunk.page });
     }
-
+    console.log(`✅ Successfully vectorized ${vectors.length} chunks`);
     return vectors;
   } catch (error) {
     console.error("Error during vectorization:", error);
     throw error;
   }
 };
-
-const determineChunkSize = (textLength) => {
-  if (textLength < 1000) return { chunkSize: 256, chunkOverlap: 30 }; // ~12% overlap
-  if (textLength < 5000) return { chunkSize: 512, chunkOverlap: 60 }; // ~12% overlap
-  if (textLength < 15000) return { chunkSize: 768, chunkOverlap: 100 }; // ~13% overlap
-  if (textLength < 30000) return { chunkSize: 1024, chunkOverlap: 150 }; // ~15% overlap
-  return { chunkSize: 2048, chunkOverlap: 300 }; // ~15% overlap
-};
-
 async function chunkText(parsedText) {
-  // Step 1: Ensure parsedContent is a string
   if (
     !parsedText ||
     typeof parsedText !== "string" ||
@@ -56,19 +47,42 @@ async function chunkText(parsedText) {
     throw new Error("Parsed content is empty or invalid.");
   }
 
-  console.log("Parsed Text Length:", parsedText.length); // Debugging
-  const { chunkSize, chunkOverlap } = determineChunkSize(parsedText.length);
+  console.log("Parsed Text Length:", parsedText.length);
 
-  // Step 2: Chunk using RecursiveCharacterTextSplitter
-  const splitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
-    chunkSize,
-    chunkOverlap,
-  });
-  const chunks = await splitter.splitText(parsedText);
-  console.log("🔹 Total Chunks Created:", chunks.length);
-  // console.log("🔹 First Chunk:", chunks[0]);
+  // Step 1: Split text by `---` to separate pages
+  const pages = parsedText.split(/\n\s*---\s*\n/); // Split only when `---` is on its own line
+  console.log(`🔹 Total Pages Detected: ${pages.length}`);
 
-  return chunks;
+  const chunkSize = 512; // Fixed chunk size
+  const chunkOverlap = 100; // Fixed chunk overlap
+
+  let allChunks = [];
+
+  for (let i = 0; i < pages.length; i++) {
+    const pageText = pages[i].trim();
+    if (!pageText) continue; // Skip empty pages
+
+    console.log(`🔹 Processing Page ${i + 1} (Length: ${pageText.length})`);
+
+    // Step 2: Apply RecursiveCharacterTextSplitter with fixed settings
+    const splitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
+      chunkSize,
+      chunkOverlap,
+    });
+
+    const chunks = await splitter.splitText(pageText);
+
+    // Step 3: Attach page number to each chunk
+    const chunksWithPageNumbers = chunks.map((chunk) => ({
+      text: chunk,
+      page: i + 1, // Page numbers start from 1
+    }));
+
+    allChunks.push(...chunksWithPageNumbers);
+  }
+
+  console.log("🔹 Total Chunks Created:", allChunks.length);
+  return allChunks;
 }
 
 module.exports = { vectorizeChunks, chunkText, convertToVector };

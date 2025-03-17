@@ -55,7 +55,7 @@ const uploadAndProcessPdf = async (req, res, next) => {
       // If not complete, wait before checking again
       if (!isComplete) {
         console.log("Waiting for processing to complete...");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 4000));
       }
     }
 
@@ -80,9 +80,9 @@ const uploadAndProcessPdf = async (req, res, next) => {
       success: true,
       message: "PDF processed and vectorized successfully",
       documentId: documentId,
-      parsedContentlength: parsedContent?.markdown?.length,
-      chunksLength: chunks.length,
-      result,
+      // parsedContentlength: parsedContent?.markdown?.length,
+      // chunksLength: chunks.length,
+      // result,
     });
   } catch (error) {
     // Log and pass error to error handler

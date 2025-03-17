@@ -40,14 +40,15 @@ const closeDB = async () => {
   }
 };
 
-const saveVectors = async (vectors, documentId) => {
+const saveVectors = async (vectorizedChunks, documentId) => {
   try {
+    console.log("🔹 Saving Vectors...");
     const mongoCollection = await connectDB(); // Use the shared connection
-
-    const documents = vectors.map((vector) => ({
+    const documents = vectorizedChunks.map((chunk) => ({
       documentId,
-      text: vector.text,
-      embedding: vector.vector, // Store vectors under "embedding" (to match MongoDB index)
+      text: chunk.text,
+      page: chunk.page,
+      embedding: chunk.vector, // Store vectors under "embedding" (to match MongoDB index)
     }));
 
     const result = await mongoCollection.insertMany(documents);
@@ -65,7 +66,7 @@ const queryVectorDB = async (queryVector, documentId) => {
     if (!Array.isArray(queryVector)) {
       throw new Error("Invalid query vector format.");
     }
-
+    console.log("🔹 Querying Vector DB...");
     const mongoCollection = await connectDB(); // Use the shared connection
 
     const results = await mongoCollection
@@ -84,7 +85,7 @@ const queryVectorDB = async (queryVector, documentId) => {
       ])
       .toArray();
 
-    // console.log("🔍 Top matching documents:", results);
+    console.log("🔍 Top matching documents found");
     return results;
   } catch (error) {
     console.error("❌ Error during vector search:", error);

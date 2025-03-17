@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Document, Page } from "react-pdf";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-function PDFViewer({ pdfFile }) {
+function PDFViewer({ pdfFile, currentPage, setCurrentPage }) {
   const [numPages, setNumPages] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -16,13 +15,6 @@ function PDFViewer({ pdfFile }) {
 
   const goToNextPage = () => {
     setCurrentPage((page) => Math.min(page + 1, numPages || 1));
-  };
-
-  // Method to allow parent component to set the current page
-  const setPage = (page) => {
-    if (page >= 1 && page <= (numPages || 1)) {
-      setCurrentPage(page);
-    }
   };
 
   return (
