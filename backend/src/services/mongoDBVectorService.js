@@ -40,14 +40,15 @@ const closeDB = async () => {
   }
 };
 
-const saveVectors = async (vectors, documentId) => {
+const saveVectors = async (vectorizedChunks, documentId) => {
   try {
+    console.log("🔹 Saving Vectors...");
     const mongoCollection = await connectDB(); // Use the shared connection
-
-    const documents = vectors.map((vector) => ({
+    const documents = vectorizedChunks.map((chunk) => ({
       documentId,
-      text: vector.text,
-      embedding: vector.vector, // Store vectors under "embedding" (to match MongoDB index)
+      text: chunk.text,
+      page: chunk.page,
+      embedding: chunk.vector, // Store vectors under "embedding" (to match MongoDB index)
     }));
 
     const result = await mongoCollection.insertMany(documents);

@@ -55,7 +55,7 @@ const uploadAndProcessPdf = async (req, res, next) => {
       // If not complete, wait before checking again
       if (!isComplete) {
         console.log("Waiting for processing to complete...");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 4000));
       }
     }
 
