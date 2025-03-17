@@ -1,23 +1,68 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload as UploadIcon, FileText } from "lucide-react";
+import { Upload as UploadIcon, FileText, AlertCircle } from "lucide-react";
+import axios from "axios";
 
 function Upload() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
-    if (file?.type === "application/pdf") {
+
+    // Clear any previous errors
+    setError("");
+
+    if (!file) return;
+
+    if (file.type === "application/pdf") {
       setIsLoading(true);
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        localStorage.setItem("pdfFile", reader.result);
+      try {
+        // Store PDF in localStorage (original functionality)
+        const reader = new FileReader();
+        reader.onload = async () => {
+          // Store the PDF data in localStorage
+          localStorage.setItem("pdfFile", reader.result);
+
+          try {
+            const formData = new FormData();
+            formData.append("pdf", file);
+
+            const backendUrl =
+              import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const uploadEndpoint = `${backendUrl}/api/pdf/upload`;
+
+            const response = await axios.post(uploadEndpoint, formData);
+
+            const documentId = response.data.documentId; // Adjust based on your API response structure
+
+            localStorage.setItem("pdfDocumentId", documentId);
+          } catch (uploadError) {
+            console.error("Error uploading to server:", uploadError);
+          }
+
+          // Navigate to chat page (original functionality)
+          setIsLoading(false);
+          navigate("/chat");
+        };
+
+        // Start reading the file as Data URL
+        reader.readAsDataURL(file);
+
+        reader.onerror = () => {
+          setIsLoading(false);
+          setError("Failed to read the PDF file. Please try again.");
+        };
+      } catch (error) {
+        console.error("Error handling PDF:", error);
         setIsLoading(false);
-        navigate("/chat");
-      };
-      reader.readAsDataURL(file);
+        setError("Failed to process the PDF. Please try again.");
+      }
+    } else {
+      // Handle invalid file type
+      setError("Please upload a valid PDF file");
     }
   };
 
@@ -72,6 +117,14 @@ function Upload() {
             </div>
           </div>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
       </div>
     </div>
   );
