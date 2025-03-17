@@ -5,8 +5,7 @@ import ChatInterface from "../components/ChatInterface";
 
 function Chat() {
   const [pdfFile, setPdfFile] = useState(null);
-  const [documentId, setDocumentId] = useState(null);
-  const pdfViewerRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,28 +16,22 @@ function Chat() {
       return;
     }
     setPdfFile(storedPdf);
-    setDocumentId(storedDocumentId);
   }, [navigate]);
-
-  const handleCitationClick = (page) => {
-    if (pdfViewerRef.current) {
-      pdfViewerRef.current.setPage(page);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Chat Section */}
       <div className="w-full md:w-1/2">
-        <ChatInterface
-          onCitationClick={handleCitationClick}
-          documentId={documentId}
-        />
+        <ChatInterface setCurrentPage={setCurrentPage} />
       </div>
 
       {/* PDF Viewer Section */}
       <div className="hidden md:block w-1/2">
-        <PDFViewer pdfFile={pdfFile} ref={pdfViewerRef} />
+        <PDFViewer
+          pdfFile={pdfFile}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
       </div>
     </div>
   );

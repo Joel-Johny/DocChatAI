@@ -1,16 +1,14 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, ChevronLeft, Book, Loader } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Send, Book, Loader } from "lucide-react";
 import axios from "axios";
 import Thinking from "./Thinking";
 import ChatHeader from "./ChatHeader";
 
-function ChatInterface({ onCitationClick }) {
+function ChatInterface({ setCurrentPage }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const chatContainerRef = useRef(null);
-
+  console.log(messages);
   // Add greeting message when component mounts
   useEffect(() => {
     // Add initial greeting message
@@ -23,13 +21,6 @@ function ChatInterface({ onCitationClick }) {
       },
     ]);
   }, []);
-
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,9 +88,8 @@ function ChatInterface({ onCitationClick }) {
   };
 
   const handleCitationClick = (page) => {
-    if (onCitationClick) {
-      onCitationClick(page);
-    }
+    console.log(page);
+    setCurrentPage(page);
   };
 
   return (
@@ -108,10 +98,7 @@ function ChatInterface({ onCitationClick }) {
       <ChatHeader />
 
       {/* Messages */}
-      <div
-        ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
-      >
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.map((message, index) => (
           <div
             key={index}
@@ -132,15 +119,22 @@ function ChatInterface({ onCitationClick }) {
               <p>{message.content}</p>
               {message.citations && message.citations.length > 0 && (
                 <div className="mt-2 text-sm">
-                  {message.citations.map((citation, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleCitationClick(citation.page)}
-                      className="text-blue-200 hover:text-blue-100 underline mr-2"
-                    >
-                      Page {citation.page}
-                    </button>
-                  ))}
+                  <div className="font-bold text-black mb-1">Citations:</div>
+                  <div>
+                    {message.citations.map((pageNumber, index) => (
+                      <React.Fragment key={index}>
+                        <button
+                          onClick={() => handleCitationClick(pageNumber)}
+                          className="text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Page {pageNumber}
+                        </button>
+                        {index < message.citations.length - 1 && (
+                          <span>, </span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
