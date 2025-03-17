@@ -10,7 +10,7 @@ const convertToVector = async (text) => {
       "feature-extraction",
       "Xenova/all-MiniLM-L6-v2"
     );
-
+    // console.log("🔹 Converting text to vector...");
     const vector = await embedder(text, { pooling: "mean", normalize: true });
 
     return Array.isArray(vector.data)
@@ -29,7 +29,7 @@ const vectorizeChunks = async (chunks) => {
 
     for (const chunk of chunks) {
       const vectorArray = await convertToVector(chunk.text);
-      vectors.push({ text: chunk, vector: vectorArray, page: chunk.page });
+      vectors.push({ text: chunk.text, vector: vectorArray, page: chunk.page });
     }
     console.log(`✅ Successfully vectorized ${vectors.length} chunks`);
     return vectors;

@@ -7,6 +7,7 @@ async function cleanModelOutput(response) {
   return response.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 }
 const generateAnswer = async (question, relevantChunks) => {
+  console.log("🔹 Generating Answer...");
   const context = relevantChunks.map((chunk) => chunk.text).join("\n");
 
   const messages = [
@@ -23,7 +24,8 @@ const generateAnswer = async (question, relevantChunks) => {
       content: `Context:\n${context}\n\nQuestion: ${question}\nAnswer in **one or two sentences only**:`,
     },
   ];
-
+  // console.log("Context:", context);
+  // console.log("question:", question);
   try {
     const chatCompletion = await client.chatCompletion({
       model: "deepseek-ai/DeepSeek-R1", // Use a valid model
@@ -35,6 +37,7 @@ const generateAnswer = async (question, relevantChunks) => {
     const cleanedResponse = cleanModelOutput(
       chatCompletion.choices[0]?.message?.content
     );
+    console.log("🔹 Answer:", cleanedResponse);
     return cleanedResponse || "No response from LLM.";
   } catch (error) {
     console.error("Hugging Face API Error:", error);

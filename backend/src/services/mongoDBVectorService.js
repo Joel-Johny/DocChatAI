@@ -66,7 +66,7 @@ const queryVectorDB = async (queryVector, documentId) => {
     if (!Array.isArray(queryVector)) {
       throw new Error("Invalid query vector format.");
     }
-
+    console.log("🔹 Querying Vector DB...");
     const mongoCollection = await connectDB(); // Use the shared connection
 
     const results = await mongoCollection
@@ -85,7 +85,7 @@ const queryVectorDB = async (queryVector, documentId) => {
       ])
       .toArray();
 
-    // console.log("🔍 Top matching documents:", results);
+    console.log("🔍 Top matching documents found");
     return results;
   } catch (error) {
     console.error("❌ Error during vector search:", error);
