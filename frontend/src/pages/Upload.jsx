@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload as UploadIcon, AlertCircle } from "lucide-react";
+import LoadingInfoMessage from "../components/LoadingInfoMessage";
 import axios from "axios";
 
 function Upload() {
@@ -117,6 +118,7 @@ function Upload() {
             </div>
           </div>
         </div>
+        {isLoading && <LoadingInfoMessage />}
 
         {/* Error message */}
         {error && (

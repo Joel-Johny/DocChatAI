@@ -35,11 +35,12 @@ const generateAnswer = async (question, relevantChunks) => {
       Example of INCORRECT formatting:
       "The project started in 2020 {{page 5}} and had a budget of $500,000 {{page 6}}."
       
-      Keep answers brief (2-3 sentences max) while still being informative.`,
+      **If you do not find any relevant information in the document, DO NOT include any page citation. 
+      Simply respond with: "I can only answer questions based on the document provided."**`,
     },
     {
       role: "user",
-      content: `Context:\n${context}\n\nQuestion: ${question}\nAnswer in one or two sentences only, with page references at the END using {{page X}} format:`,
+      content: `Context:\n${context}\n\nQuestion: ${question}\nAnswer in one or two sentences only, with page references at the END using {{page X}} format (only if relevant info is found):`,
     },
   ];
 
