@@ -50,7 +50,7 @@ async function chunkText(parsedText) {
   console.log("Parsed Text Length:", parsedText.length);
 
   // Step 1: Split text by `---` to separate pages
-  const pages = parsedText.split(/---+/); // Split on multiple `---`
+  const pages = parsedText.split(/\n---\n/); // Split only when `---` is on its own line
   console.log(`🔹 Total Pages Detected: ${pages.length}`);
 
   const chunkSize = 512; // Fixed chunk size

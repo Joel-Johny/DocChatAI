@@ -29,7 +29,7 @@ const askQuestion = async (req, res, next) => {
       // relevantChunks,
       // lengthOfRelevantChunks: relevantChunks.length,
       answer,
-      pageNumbers,
+      citations: pageNumbers,
     });
   } catch (error) {
     next(error);
