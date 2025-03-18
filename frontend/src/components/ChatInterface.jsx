@@ -8,7 +8,7 @@ function ChatInterface({ setCurrentPage }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  console.log(messages);
+  // console.log(messages);
   // Add greeting message when component mounts
   useEffect(() => {
     // Add initial greeting message
@@ -88,7 +88,7 @@ function ChatInterface({ setCurrentPage }) {
   };
 
   const handleCitationClick = (page) => {
-    console.log(page);
+    // console.log(page);
     setCurrentPage(page);
   };
 
