@@ -1,4 +1,4 @@
-import { AlertCircle, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
 function LoadingInfoMessage() {
   return (
@@ -7,6 +7,9 @@ function LoadingInfoMessage() {
       <div className="text-sm text-blue-700">
         <p>Longer PDFs may take more time to process. Please Wait....</p>
         <p className="mt-1">Maximum file size: 10 MB</p>
+        <p className="mt-1">
+          I am using Render free tier so please be patient.
+        </p>
       </div>
     </div>
   );
